@@ -1,95 +1,60 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web, Desktop (JVM), Server.
+# My Profile App
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+[![Kotlin](https://img.shields.io/badge/Kotlin-Multiplatform-blue?logo=kotlin)](#)
+[![Compose](https://img.shields.io/badge/Compose-Multiplatform-success?logo=jetpackcompose)](#)
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
-
-* [/server](./server/src/main/kotlin) is for the Ktor server application.
-
-* [/shared](./shared/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
-
-### Build and Run Android Application
-
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
-
-### Build and Run Desktop (JVM) Application
-
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:run
-  ```
-
-### Build and Run Server
-
-To build and run the development version of the server, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :server:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :server:run
-  ```
-
-### Build and Run Web Application
-
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE's toolbar or run it directly from the terminal:
-- for the Wasm target (faster, modern browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-- for the JS target (slower, supports older browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:jsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:jsBrowserDevelopmentRun
-    ```
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+[cite_start]**Tugas Praktikum Pertemuan 3 — Compose Multiplatform Basics** [cite: 3, 4]  
+[cite_start]IF25-22017 Pengembangan Aplikasi Mobile [cite: 1, 2]  
+[cite_start]Program Studi Teknik Informatika · Institut Teknologi Sumatera [cite: 6, 7]  
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+## Deskripsi
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+[cite_start]**My Profile App** adalah aplikasi multiplatform yang dibangun menggunakan Kotlin dan Compose Multiplatform[cite: 9, 10]. Aplikasi ini menampilkan halaman profil pengguna dengan Tema Merah khas ITERA. Aplikasi ini dilengkapi animasi, informasi kontak, dan daftar keahlian. [cite_start]Dirancang dengan paradigma UI Deklaratif [cite: 51, 52] agar performanya optimal dan responsif.
+
+## Screenshot
+
+<img width="418" height="804" alt="image" src="https://github.com/user-attachments/assets/6675a317-1591-4ef5-9584-8680e5c23cc3" />
+<img width="419" height="881" alt="image" src="https://github.com/user-attachments/assets/7f16dab1-4025-4dd1-9d3f-9e4bc0e7412c" />
+
+## Pemenuhan Rubrik Penilaian
+
+[cite_start]Aplikasi ini telah memenuhi seluruh kriteria penilaian dan mencapai target Bonus[cite: 639]:
+
+* [cite_start]**Layout Implementation (25%)** [cite: 639][cite_start]: Menggunakan kombinasi tata letak `Column`, `Row`, dan `Box`[cite: 168, 639].
+* [cite_start]**Reusable Composables (25%)** [cite: 639][cite_start]: Memiliki 4 custom composable functions (`ProfileHeader`, `StatItem`, `InfoItem`, `ProfileCard`)[cite: 630, 639].
+* [cite_start]**UI Components (20%)** [cite: 639][cite_start]: Menggunakan komponen dasar seperti `Text`, `Button`, `Image` (dengan foto asli), dan `Card`[cite: 29, 631, 639].
+* [cite_start]**Modifiers (15%)** [cite: 639][cite_start]: Melakukan styling dengan modifier (gradient background, padding, clip, shape, offset, dan border)[cite: 28, 639].
+* [cite_start]**Bonus Animasi (+10%)** [cite: 639][cite_start]: Mengimplementasikan `AnimatedVisibility` [cite: 639] untuk efek animasi saat tombol "Lihat Detail" ditekan.
+* **Bebas Error**: Menggunakan karakter Emoji bawaan sebagai pengganti *library* ikon eksternal agar aplikasi dapat berjalan lancar tanpa masalah *dependency*.
+
+## Struktur Composable Functions
+
+| Composable | Kegunaan |
+| :--- | :--- |
+| `ProfileHeader` | Header merah yang menampilkan foto profil (`Image`), nama, gelar, dan bio. |
+| `StatItem` | Komponen untuk menampilkan angka statistik (Proyek, IPK, Semester). |
+| `InfoItem` | Baris informasi berisi Emoji, label, dan nilai (dipakai untuk Kontak & Keahlian). |
+| `ProfileCard` | Komponen `Card` untuk membungkus grup informasi terkait. |
+| `App` | Fungsi utama yang menyatukan seluruh komponen UI dan mengatur jalannya animasi. |
+
+## Teknologi & Tools
+
+* [cite_start]**Bahasa Utama**: Kotlin [cite: 9, 52]
+* [cite_start]**Framework UI**: Compose Multiplatform [cite: 9, 52] (Material 3)
+* [cite_start]**State Management**: `remember`, `mutableStateOf` [cite: 457]
+* **Animation**: `androidx.compose.animation`
+
+## Cara Menjalankan Aplikasi
+
+### Android
+1. Buka project di **Android Studio**.
+2. Tunggu hingga proses *Sync Gradle* selesai.
+3. Pilih target *run* pada modul `composeApp`.
+4. Jalankan di emulator atau perangkat Android fisik (tekan **Shift + F10**).
+
+### Desktop (JVM)
+Buka terminal di dalam folder project dan jalankan perintah berikut:
+```bash
+./gradlew :composeApp:run
