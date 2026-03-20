@@ -1,60 +1,183 @@
-# My Profile App
+# 📱 My Profile App — MVVM & State Management
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-Multiplatform-blue?logo=kotlin)](#)
 [![Compose](https://img.shields.io/badge/Compose-Multiplatform-success?logo=jetpackcompose)](#)
 
-[cite_start]**Tugas Praktikum Pertemuan 3 — Compose Multiplatform Basics** [cite: 3, 4]  
-[cite_start]IF25-22017 Pengembangan Aplikasi Mobile [cite: 1, 2]  
-[cite_start]Program Studi Teknik Informatika · Institut Teknologi Sumatera [cite: 6, 7]  
+**Tugas Praktikum Pertemuan 4 — State Management dan MVVM**
+IF25-22017 Pengembangan Aplikasi Mobile
+Program Studi Teknik Informatika · Institut Teknologi Sumatera
 
 ---
 
-## Deskripsi
+## 📖 Deskripsi
 
-[cite_start]**My Profile App** adalah aplikasi multiplatform yang dibangun menggunakan Kotlin dan Compose Multiplatform[cite: 9, 10]. Aplikasi ini menampilkan halaman profil pengguna dengan Tema Merah khas ITERA. Aplikasi ini dilengkapi animasi, informasi kontak, dan daftar keahlian. [cite_start]Dirancang dengan paradigma UI Deklaratif [cite: 51, 52] agar performanya optimal dan responsif.
+Pengembangan lanjutan dari *Profile App*. Aplikasi ini telah diarsiteki ulang menggunakan pola **MVVM (Model-View-ViewModel)** dengan `StateFlow`.
 
-## Screenshot
+Pembaruan ini menghadirkan:
 
-<img width="418" height="804" alt="image" src="https://github.com/user-attachments/assets/6675a317-1591-4ef5-9584-8680e5c23cc3" />
-<img width="419" height="881" alt="image" src="https://github.com/user-attachments/assets/7f16dab1-4025-4dd1-9d3f-9e4bc0e7412c" />
+* ✏️ Fitur **Edit Profil**
+* 🌙 **Dark Mode Toggle**
+* ⚡ State management reaktif dengan Compose Multiplatform
+* 🎨 Tema Merah
 
-## Pemenuhan Rubrik Penilaian
+---
 
-[cite_start]Aplikasi ini telah memenuhi seluruh kriteria penilaian dan mencapai target Bonus[cite: 639]:
+## 📸 Screenshot
 
-* [cite_start]**Layout Implementation (25%)** [cite: 639][cite_start]: Menggunakan kombinasi tata letak `Column`, `Row`, dan `Box`[cite: 168, 639].
-* [cite_start]**Reusable Composables (25%)** [cite: 639][cite_start]: Memiliki 4 custom composable functions (`ProfileHeader`, `StatItem`, `InfoItem`, `ProfileCard`)[cite: 630, 639].
-* [cite_start]**UI Components (20%)** [cite: 639][cite_start]: Menggunakan komponen dasar seperti `Text`, `Button`, `Image` (dengan foto asli), dan `Card`[cite: 29, 631, 639].
-* [cite_start]**Modifiers (15%)** [cite: 639][cite_start]: Melakukan styling dengan modifier (gradient background, padding, clip, shape, offset, dan border)[cite: 28, 639].
-* [cite_start]**Bonus Animasi (+10%)** [cite: 639][cite_start]: Mengimplementasikan `AnimatedVisibility` [cite: 639] untuk efek animasi saat tombol "Lihat Detail" ditekan.
-* **Bebas Error**: Menggunakan karakter Emoji bawaan sebagai pengganti *library* ikon eksternal agar aplikasi dapat berjalan lancar tanpa masalah *dependency*.
+*(Tambahkan screenshot aplikasi kamu di sini)*
 
-## Struktur Composable Functions
+<img width="367" height="874" alt="image" src="https://github.com/user-attachments/assets/5405b417-69fb-4d85-9b56-8c429efd24e7" />
 
-| Composable | Kegunaan |
-| :--- | :--- |
-| `ProfileHeader` | Header merah yang menampilkan foto profil (`Image`), nama, gelar, dan bio. |
-| `StatItem` | Komponen untuk menampilkan angka statistik (Proyek, IPK, Semester). |
-| `InfoItem` | Baris informasi berisi Emoji, label, dan nilai (dipakai untuk Kontak & Keahlian). |
-| `ProfileCard` | Komponen `Card` untuk membungkus grup informasi terkait. |
-| `App` | Fungsi utama yang menyatukan seluruh komponen UI dan mengatur jalannya animasi. |
+<img width="378" height="870" alt="image" src="https://github.com/user-attachments/assets/650017eb-59fc-49ce-adb6-bed8d243df3b" />
 
-## Teknologi & Tools
+<img width="393" height="871" alt="image" src="https://github.com/user-attachments/assets/f81e1989-263d-4ed9-b738-9ecde6a4afcd" />
 
-* [cite_start]**Bahasa Utama**: Kotlin [cite: 9, 52]
-* [cite_start]**Framework UI**: Compose Multiplatform [cite: 9, 52] (Material 3)
-* [cite_start]**State Management**: `remember`, `mutableStateOf` [cite: 457]
-* **Animation**: `androidx.compose.animation`
+<img width="420" height="889" alt="image" src="https://github.com/user-attachments/assets/89e3b3d7-7ead-49ad-9540-80e5bd8c9222" />
 
-## Cara Menjalankan Aplikasi
+
+
+---
+
+## ✨ Fitur & Pencapaian
+
+* ✅ **ViewModel Implementation (25%)**
+  Menggunakan `ProfileViewModel` dengan `MutableStateFlow`
+
+* ✅ **UI State Pattern (20%)**
+  State dibungkus dalam `ProfileUiState` (*Single Source of Truth*)
+
+* ✅ **State Hoisting (20%)**
+  Komponen `LabeledTextField` bersifat stateless
+
+* ✅ **Edit Feature (20%)**
+  Dialog untuk update nama & bio secara real-time
+
+* ✅ **Code Structure (15%)**
+  Struktur dipisah: `data`, `ui`, `viewmodel`
+
+* ⭐ **Bonus (+10%)**
+  Dark Mode mempengaruhi seluruh UI
+
+* 🟢 **Zero Error Build**
+  Menggunakan emoji sistem (tanpa dependency ikon)
+
+---
+
+## 📋 Data Profil Default
+
+| Field   | Value                                                             |
+| ------- | ----------------------------------------------------------------- |
+| Nama    | Muhammad Piela Nugraha                                            |
+| Title   | Mahasiswa Teknik Informatika                                      |
+| Email   | [emailmu@student.itera.ac.id](mailto:emailmu@student.itera.ac.id) |
+| Telepon | +62 812-3456-7890                                                 |
+| Lokasi  | Bandar Lampung, Indonesia                                         |
+
+---
+
+## 🗂️ Struktur Folder
+
+```
+composeApp/src/commonMain/kotlin/com/example/myprofileapp/
+├── App.kt
+├── data/
+│   └── ProfileUiState.kt
+├── viewmodel/
+│   └── ProfileViewModel.kt
+└── ui/
+    └── ProfileScreen.kt
+```
+
+---
+
+## 🏗️ Arsitektur MVVM & Alur Data
+
+```
+[ ProfileUiState ]       ← Model
+        ↓
+[ ProfileViewModel ]     ← ViewModel
+        ↓ ↑
+[ ProfileScreen ]        ← View
+```
+
+**Alur:**
+
+1. ViewModel menyimpan state (`MutableStateFlow`)
+2. UI mengobservasi dengan `collectAsState()`
+3. User input → event → ViewModel → update state
+
+---
+
+## 🔗 State Hoisting
+
+```
+EditProfileDialog
+    └── LabeledTextField (Stateless)
+            ├── value (↓ dari parent)
+            └── onValueChange (↑ ke parent)
+```
+
+---
+
+## 🧩 Daftar Composable
+
+| Composable           | Deskripsi                 |
+| -------------------- | ------------------------- |
+| ProfileHeader        | Header + Dark Mode switch |
+| EditProfileDialog    | Form edit profil          |
+| LabeledTextField     | Input stateless           |
+| StatItem             | Statistik                 |
+| InfoItem             | Info profil               |
+| ProfileCardContainer | Wrapper card              |
+| ProfileScreen        | Main UI                   |
+
+---
+
+## ⚙️ Event Handler (ViewModel)
+
+| Fungsi         | Aksi              |
+| -------------- | ----------------- |
+| updateProfile  | Update nama & bio |
+| toggleDarkMode | Ganti tema        |
+
+---
+
+## 🎨 Tema Warna
+
+| Elemen     | Light Mode        | Dark Mode         |
+| ---------- | ----------------- | ----------------- |
+| Background | #FFF0F0           | #121212           |
+| Surface    | #FFFFFF           | #1E1E1E           |
+| Header     | #B71C1C → #E53935 | #6B1111 → #8E1D1D |
+| Text       | #212121           | #FFFFFF           |
+
+---
+
+## 🚀 Cara Menjalankan
 
 ### Android
-1. Buka project di **Android Studio**.
-2. Tunggu hingga proses *Sync Gradle* selesai.
-3. Pilih target *run* pada modul `composeApp`.
-4. Jalankan di emulator atau perangkat Android fisik (tekan **Shift + F10**).
+
+1. Buka di Android Studio
+2. Tunggu Gradle Sync
+3. Jalankan (Shift + F10)
 
 ### Desktop (JVM)
-Buka terminal di dalam folder project dan jalankan perintah berikut:
+
 ```bash
 ./gradlew :composeApp:run
+```
+
+---
+
+## 👨‍💻 Penulis
+
+| Keterangan | Detail                       |
+| ---------- | ---------------------------- |
+| Nama       | Muhammad Piela Nugraha       |
+| NIM        | 123140200                    |
+| Kelas      | Pengembangan Aplikasi Mobile |
+| Institusi  | Institut Teknologi Sumatera  |
+
+---
+
+**Tugas Praktikum 4 · Tahun Akademik Genap 2025/2026**
