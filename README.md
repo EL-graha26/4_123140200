@@ -1,60 +1,47 @@
-# My Profile App
+# Tugas Praktikum PAM Minggu 5: Navigasi Antar Layar
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-Multiplatform-blue?logo=kotlin)](#)
-[![Compose](https://img.shields.io/badge/Compose-Multiplatform-success?logo=jetpackcompose)](#)
+Repositori ini berisi implementasi **Note App** dengan fitur navigasi *multi-screen* menggunakan Jetpack Navigation Compose, yang dikembangkan untuk memenuhi Tugas Praktikum Pengembangan Aplikasi Mobile.
 
-[cite_start]**Tugas Praktikum Pertemuan 3 — Compose Multiplatform Basics** [cite: 3, 4]  
-[cite_start]IF25-22017 Pengembangan Aplikasi Mobile [cite: 1, 2]  
-[cite_start]Program Studi Teknik Informatika · Institut Teknologi Sumatera [cite: 6, 7]  
+## 👨‍💻 Identitas
+- **Nama:** Muhammad Piela Nugraha
+- **NIM:** 123140200
+- **Program Studi:** Teknik Informatika
+- **Institut:** Institut Teknologi Sumatera (ITERA)
+
+## 📱 Fitur Aplikasi & Pemenuhan Kriteria
+Aplikasi ini telah memenuhi seluruh spesifikasi tugas praktikum:
+1. **Bottom Navigation:** Terdapat 3 tab utama fungsional yaitu Notes, Favorites, dan Profile.
+2. **Passing Arguments (`noteId`):** Pengiriman data `noteId` yang berjalan dengan baik dari Note List ke Note Detail dan Edit Note.
+3. **Floating Action Button (FAB):** FAB tersedia di layar utama (Notes) untuk bernavigasi ke AddNoteScreen.
+4. **Proper Back Navigation:** Navigasi kembali (*back*) berjalan dengan semestinya dari setiap *screen* (menggunakan *TopAppBar* dan tombol *back* sistem).
+5. **Bonus - Navigation Drawer:** Terdapat menu samping (Drawer) yang berisi navigasi tambahan dan fitur interaktif (Switch Dark/Light Mode).
+
+## 📂 Struktur Folder
+Struktur proyek telah disesuaikan dengan standar arsitektur yang diminta:
+- `components/` : Berisi komponen UI yang dapat digunakan kembali (TopBar, NoteCard, TextFields).
+- `data/` : Berisi model data (Note.kt).
+- `navigation/` : Berisi definisi rute navigasi menggunakan *sealed class* (Routes.kt).
+- `screens/` : Berisi seluruh composable layar utuh (NoteScreens.kt, ProfileScreen.kt).
+- `viewmodel/` : Berisi *state management* untuk Profil dan Catatan.
+
+## 🗺️ Navigation Flow Diagram
+<img width="1150" height="555" alt="image" src="https://github.com/user-attachments/assets/0539142e-dd7a-4a2b-981a-f31660d8707e" />
+
+Berikut adalah antarmuka aplikasi dari berbagai layar:
+
+| Semua Catatan (Home) | Catatan Favorit | Profil Saya |
+| :---: | :---: | :---: |
+|  <img width="415" height="883" alt="image" src="https://github.com/user-attachments/assets/0396ea10-412d-489f-bbbb-ae4db00c77ab" /> | <img width="410" height="881" alt="image" src="https://github.com/user-attachments/assets/abc1f8b6-4885-4eb8-954b-eb21103c2877" /> | <img width="440" height="877" alt="image" src="https://github.com/user-attachments/assets/f64e5a7a-0244-45f3-ab5f-ab5b9f37d157" /> |
+
+| Tambah Catatan | Detail Catatan | Edit Catatan | Navigation Drawer |
+| :---: | :---: | :---: | :---: |
+| <img width="428" height="883" alt="image" src="https://github.com/user-attachments/assets/9cb8af27-3c69-4c82-a19d-3dc726e9b26c" /> | <img width="437" height="900" alt="image" src="https://github.com/user-attachments/assets/c4df9190-f8a0-49f2-a783-68ee63e23beb" /> | <img width="414" height="888" alt="image" src="https://github.com/user-attachments/assets/78a92796-dd3c-494a-830d-b2aae8dd042e" /> | <img width="435" height="904" alt="image" src="https://github.com/user-attachments/assets/14358b22-e233-4e18-a3df-127baa6f1495" />
+| |
+
+## 🎥 Video Demo
+https://github.com/user-attachments/assets/4893288b-9a35-483d-a09f-0f6842fc2570
+
+
 
 ---
-
-## Deskripsi
-
-[cite_start]**My Profile App** adalah aplikasi multiplatform yang dibangun menggunakan Kotlin dan Compose Multiplatform[cite: 9, 10]. Aplikasi ini menampilkan halaman profil pengguna dengan Tema Merah khas ITERA. Aplikasi ini dilengkapi animasi, informasi kontak, dan daftar keahlian. [cite_start]Dirancang dengan paradigma UI Deklaratif [cite: 51, 52] agar performanya optimal dan responsif.
-
-## Screenshot
-
-<img width="418" height="804" alt="image" src="https://github.com/user-attachments/assets/6675a317-1591-4ef5-9584-8680e5c23cc3" />
-<img width="419" height="881" alt="image" src="https://github.com/user-attachments/assets/7f16dab1-4025-4dd1-9d3f-9e4bc0e7412c" />
-
-## Pemenuhan Rubrik Penilaian
-
-[cite_start]Aplikasi ini telah memenuhi seluruh kriteria penilaian dan mencapai target Bonus[cite: 639]:
-
-* [cite_start]**Layout Implementation (25%)** [cite: 639][cite_start]: Menggunakan kombinasi tata letak `Column`, `Row`, dan `Box`[cite: 168, 639].
-* [cite_start]**Reusable Composables (25%)** [cite: 639][cite_start]: Memiliki 4 custom composable functions (`ProfileHeader`, `StatItem`, `InfoItem`, `ProfileCard`)[cite: 630, 639].
-* [cite_start]**UI Components (20%)** [cite: 639][cite_start]: Menggunakan komponen dasar seperti `Text`, `Button`, `Image` (dengan foto asli), dan `Card`[cite: 29, 631, 639].
-* [cite_start]**Modifiers (15%)** [cite: 639][cite_start]: Melakukan styling dengan modifier (gradient background, padding, clip, shape, offset, dan border)[cite: 28, 639].
-* [cite_start]**Bonus Animasi (+10%)** [cite: 639][cite_start]: Mengimplementasikan `AnimatedVisibility` [cite: 639] untuk efek animasi saat tombol "Lihat Detail" ditekan.
-* **Bebas Error**: Menggunakan karakter Emoji bawaan sebagai pengganti *library* ikon eksternal agar aplikasi dapat berjalan lancar tanpa masalah *dependency*.
-
-## Struktur Composable Functions
-
-| Composable | Kegunaan |
-| :--- | :--- |
-| `ProfileHeader` | Header merah yang menampilkan foto profil (`Image`), nama, gelar, dan bio. |
-| `StatItem` | Komponen untuk menampilkan angka statistik (Proyek, IPK, Semester). |
-| `InfoItem` | Baris informasi berisi Emoji, label, dan nilai (dipakai untuk Kontak & Keahlian). |
-| `ProfileCard` | Komponen `Card` untuk membungkus grup informasi terkait. |
-| `App` | Fungsi utama yang menyatukan seluruh komponen UI dan mengatur jalannya animasi. |
-
-## Teknologi & Tools
-
-* [cite_start]**Bahasa Utama**: Kotlin [cite: 9, 52]
-* [cite_start]**Framework UI**: Compose Multiplatform [cite: 9, 52] (Material 3)
-* [cite_start]**State Management**: `remember`, `mutableStateOf` [cite: 457]
-* **Animation**: `androidx.compose.animation`
-
-## Cara Menjalankan Aplikasi
-
-### Android
-1. Buka project di **Android Studio**.
-2. Tunggu hingga proses *Sync Gradle* selesai.
-3. Pilih target *run* pada modul `composeApp`.
-4. Jalankan di emulator atau perangkat Android fisik (tekan **Shift + F10**).
-
-### Desktop (JVM)
-Buka terminal di dalam folder project dan jalankan perintah berikut:
-```bash
-./gradlew :composeApp:run
+*Dibuat dengan menggunakan Kotlin Multiplatform & Compose.*
