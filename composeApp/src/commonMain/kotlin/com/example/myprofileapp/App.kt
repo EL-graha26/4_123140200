@@ -1,6 +1,7 @@
 package com.example.myprofileapp
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
@@ -14,25 +15,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+
+// --- BAGIAN IMPORT DATA ---
+import com.example.myprofileapp.data.Note
+import com.example.myprofileapp.data.NotesUiState
+import com.example.myprofileapp.data.local.DatabaseDriverFactory
+import com.example.myprofileapp.data.local.NoteRepository
+import com.example.myprofileapp.data.local.SettingsManager
 import com.example.myprofileapp.navigation.BottomNavItem
 import com.example.myprofileapp.navigation.Screen
 import com.example.myprofileapp.screens.*
 import com.example.myprofileapp.viewmodel.ProfileViewModel
 import com.example.myprofileapp.viewmodel.NotesViewModel
+import com.russhwolf.settings.ObservableSettings
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App() {
-    val profileViewModel = remember { ProfileViewModel() }
-    val notesViewModel = remember { NotesViewModel() }
+fun App(
+    databaseDriverFactory: DatabaseDriverFactory,
+    settings: ObservableSettings
+) {
+    val repository = remember { NoteRepository(databaseDriverFactory) }
+    val settingsManager = remember { SettingsManager(settings) }
+    val profileViewModel = remember { ProfileViewModel(settingsManager) }
+    val notesViewModel = remember { NotesViewModel(repository) }
 
     val uiState by profileViewModel.uiState.collectAsState()
-    val notesList by notesViewModel.notes.collectAsState()
+    val notesUiState by notesViewModel.uiState.collectAsState()
+    val searchQuery by notesViewModel.searchQuery.collectAsState()
+
+    val notesList = when (notesUiState) {
+        is NotesUiState.Success -> (notesUiState as NotesUiState.Success).notes
+        else -> emptyList<Note>()
+    }
 
     val colorScheme = if (uiState.isDarkMode) darkColorScheme() else lightColorScheme()
 
@@ -47,79 +68,44 @@ fun App() {
         val bottomNavItems = listOf(BottomNavItem.Notes, BottomNavItem.Favorites, BottomNavItem.Profile)
         val showBottomNav = bottomNavItems.any { it.route == currentRoute }
 
+        val SageGreen = Color(0xFF8BA888)
+        val softGray = Color(0xFF888888)
+
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                ModalDrawerSheet {
+                ModalDrawerSheet(drawerContainerColor = MaterialTheme.colorScheme.surface) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text("Menu", modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.LightGray.copy(alpha = 0.2f))
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Menu Note App", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    HorizontalDivider()
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     NavigationDrawerItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Notes") },
-                        label = { Text("Semua Catatan") },
-                        selected = currentRoute == Screen.Notes.route,
-                        onClick = {
-                            navController.navigate(Screen.Notes.route) {
-                                popUpTo(Screen.Notes.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            scope.launch { drawerState.close() }
-                        },
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        icon = { Icon(Icons.Default.Home, contentDescription = "Notes") }, label = { Text("Semua Catatan", fontWeight = FontWeight.Medium) },
+                        selected = currentRoute == Screen.Notes.route, colors = NavigationDrawerItemDefaults.colors(selectedContainerColor = SageGreen.copy(alpha = 0.15f), selectedIconColor = SageGreen, selectedTextColor = SageGreen),
+                        onClick = { navController.navigate(Screen.Notes.route) { popUpTo(Screen.Notes.route) { saveState = true }; launchSingleTop = true; restoreState = true }; scope.launch { drawerState.close() } }, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                     )
-
                     NavigationDrawerItem(
-                        icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorites") },
-                        label = { Text("Catatan Favorit") },
-                        selected = currentRoute == Screen.Favorites.route,
-                        onClick = {
-                            navController.navigate(Screen.Favorites.route) {
-                                popUpTo(Screen.Notes.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            scope.launch { drawerState.close() }
-                        },
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorites") }, label = { Text("Catatan Favorit", fontWeight = FontWeight.Medium) },
+                        selected = currentRoute == Screen.Favorites.route, colors = NavigationDrawerItemDefaults.colors(selectedContainerColor = SageGreen.copy(alpha = 0.15f), selectedIconColor = SageGreen, selectedTextColor = SageGreen),
+                        onClick = { navController.navigate(Screen.Favorites.route) { popUpTo(Screen.Notes.route) { saveState = true }; launchSingleTop = true; restoreState = true }; scope.launch { drawerState.close() } }, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                     )
-
                     NavigationDrawerItem(
-                        icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-                        label = { Text("Profil Saya") },
-                        selected = currentRoute == Screen.Profile.route,
-                        onClick = {
-                            navController.navigate(Screen.Profile.route) {
-                                popUpTo(Screen.Notes.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            scope.launch { drawerState.close() }
-                        },
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        icon = { Icon(Icons.Default.Person, contentDescription = "Profile") }, label = { Text("Profil Saya", fontWeight = FontWeight.Medium) },
+                        selected = currentRoute == Screen.Profile.route, colors = NavigationDrawerItemDefaults.colors(selectedContainerColor = SageGreen.copy(alpha = 0.15f), selectedIconColor = SageGreen, selectedTextColor = SageGreen),
+                        onClick = { navController.navigate(Screen.Profile.route) { popUpTo(Screen.Notes.route) { saveState = true }; launchSingleTop = true; restoreState = true }; scope.launch { drawerState.close() } }, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                     )
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
+                    Spacer(modifier = Modifier.weight(1f))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.LightGray.copy(alpha = 0.2f))
                     NavigationDrawerItem(
                         label = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(if (uiState.isDarkMode) "Mode Terang" else "Mode Gelap")
-                                Switch(
-                                    checked = uiState.isDarkMode,
-                                    onCheckedChange = { profileViewModel.toggleDarkMode(it) }
-                                )
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text(if (uiState.isDarkMode) "Mode Terang" else "Mode Gelap", fontWeight = FontWeight.Medium)
+                                Switch(checked = uiState.isDarkMode, onCheckedChange = { profileViewModel.toggleDarkMode(it) }, colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = SageGreen))
                             }
                         },
-                        selected = false,
-                        onClick = { profileViewModel.toggleDarkMode(!uiState.isDarkMode) },
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        selected = false, onClick = { profileViewModel.toggleDarkMode(!uiState.isDarkMode) }, modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
                     )
                 }
             }
@@ -128,39 +114,20 @@ fun App() {
                 topBar = {
                     if (showBottomNav) {
                         TopAppBar(
-                            title = { Text("Note App") },
-                            navigationIcon = {
-                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color(0xFF8E1D1D),
-                                titleContentColor = Color.White,
-                                navigationIconContentColor = Color.White
-                            )
+                            title = { Text("Notes", fontWeight = FontWeight.ExtraBold, fontSize = 26.sp) },
+                            navigationIcon = { IconButton(onClick = { scope.launch { drawerState.open() } }) { Icon(Icons.Default.Menu, contentDescription = "Menu") } },
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background, titleContentColor = MaterialTheme.colorScheme.onBackground, navigationIconContentColor = MaterialTheme.colorScheme.onBackground)
                         )
                     }
                 },
                 bottomBar = {
                     if (showBottomNav) {
-                        NavigationBar(containerColor = Color(0xFF1E1E1E)) {
+                        NavigationBar(containerColor = MaterialTheme.colorScheme.background, tonalElevation = 0.dp, modifier = Modifier.height(72.dp)) {
                             bottomNavItems.forEach { item ->
                                 NavigationBarItem(
-                                    icon = { Icon(item.icon, contentDescription = item.label) },
-                                    label = { Text(item.label) },
-                                    selected = currentRoute == item.route,
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = Color(0xFFB71C1C),
-                                        indicatorColor = Color.Black
-                                    ),
-                                    onClick = {
-                                        navController.navigate(item.route) {
-                                            popUpTo(route = Screen.Notes.route) { saveState = true }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    }
+                                    icon = { Icon(item.icon, contentDescription = item.label, modifier = Modifier.size(26.dp)) }, selected = currentRoute == item.route,
+                                    colors = NavigationBarItemDefaults.colors(selectedIconColor = SageGreen, indicatorColor = Color.Transparent, unselectedIconColor = softGray),
+                                    onClick = { navController.navigate(item.route) { popUpTo(route = Screen.Notes.route) { saveState = true }; launchSingleTop = true; restoreState = true } }
                                 )
                             }
                         }
@@ -168,70 +135,49 @@ fun App() {
                 },
                 floatingActionButton = {
                     if (currentRoute == Screen.Notes.route) {
-                        FloatingActionButton(
-                            onClick = { navController.navigate(Screen.AddNote.route) },
-                            containerColor = Color(0xFFB71C1C),
-                            contentColor = Color.White
-                        ) { Icon(Icons.Default.Add, contentDescription = "Add Note") }
+                        FloatingActionButton(onClick = { navController.navigate(Screen.AddNote.route) }, containerColor = SageGreen, contentColor = Color.White, shape = CircleShape, elevation = FloatingActionButtonDefaults.elevation(4.dp)) {
+                            Icon(Icons.Default.Add, contentDescription = "Add Note", modifier = Modifier.size(28.dp))
+                        }
                     }
                 }
             ) { innerPadding ->
-                NavHost(
-                    navController = navController,
-                    startDestination = Screen.Notes.route,
-                    modifier = Modifier.padding(innerPadding)
-                ) {
+                NavHost(navController = navController, startDestination = Screen.Notes.route, modifier = Modifier.padding(innerPadding)) {
                     composable(Screen.Notes.route) {
                         NoteListScreen(
-                            notes = notesList,
-                            isDarkMode = uiState.isDarkMode,
-                            onNoteClick = { noteId -> navController.navigate(Screen.NoteDetail.createRoute(noteId)) },
-                            onToggleFavorite = { noteId -> notesViewModel.toggleFavorite(noteId) }
+                            uiState = notesUiState, searchQuery = searchQuery, onSearchChanged = { notesViewModel.onSearchQueryChanged(it) },
+                            isDarkMode = uiState.isDarkMode, onNoteClick = { noteId -> navController.navigate(Screen.NoteDetail.createRoute(noteId)) },
+                            onToggleFavorite = { noteId, isFav -> notesViewModel.toggleFavorite(noteId, isFav) }
                         )
                     }
                     composable(Screen.Favorites.route) {
                         FavoritesScreen(
-                            notes = notesList,
-                            isDarkMode = uiState.isDarkMode,
-                            onNoteClick = { noteId -> navController.navigate(Screen.NoteDetail.createRoute(noteId)) },
-                            onToggleFavorite = { noteId -> notesViewModel.toggleFavorite(noteId) }
+                            notes = notesList, isDarkMode = uiState.isDarkMode, onNoteClick = { noteId -> navController.navigate(Screen.NoteDetail.createRoute(noteId)) },
+                            onToggleFavorite = { noteId -> val note = notesList.find { it.id == noteId }; if (note != null) notesViewModel.toggleFavorite(noteId, note.isFavorite) }
                         )
                     }
                     composable(Screen.Profile.route) {
-                        ProfileScreen(
-                            uiState = uiState,
-                            onEditProfile = { newName, newBio -> profileViewModel.updateProfile(newName, newBio) },
-                            onToggleDarkMode = { isDark -> profileViewModel.toggleDarkMode(isDark) }
-                        )
+                        ProfileScreen(uiState = uiState, onEditProfile = { newName, newBio -> profileViewModel.updateProfile(newName, newBio) }, onToggleDarkMode = { isDark -> profileViewModel.toggleDarkMode(isDark) })
                     }
-
                     composable(Screen.AddNote.route) {
-                        AddNoteScreen(
-                            onSave = { title, content -> notesViewModel.addNote(title, content) },
-                            onBack = { navController.popBackStack() }
-                        )
+                        AddNoteScreen(isDarkMode = uiState.isDarkMode, onSave = { title, content -> notesViewModel.addNote(title, content) }, onBack = { navController.popBackStack() })
                     }
-
                     composable(route = Screen.NoteDetail.route, arguments = listOf(navArgument("noteId") { type = NavType.IntType })) { backStackEntry ->
                         val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0
                         val note = notesList.find { it.id == noteId }
                         NoteDetailScreen(
-                            note = note,
-                            isDarkMode = uiState.isDarkMode,
-                            onBack = { navController.popBackStack() },
-                            onEditClick = { id -> navController.navigate(Screen.EditNote.createRoute(id)) }
+                            note = note, isDarkMode = uiState.isDarkMode, onBack = { navController.popBackStack() },
+                            onEditClick = { id -> navController.navigate(Screen.EditNote.createRoute(id)) },
+                            // PERBAIKAN: Menambahkan fungsi Delete!
+                            onDeleteClick = { id ->
+                                notesViewModel.deleteNote(id) // Hapus dari database
+                                navController.popBackStack()  // Langsung kembali ke layar utama
+                            }
                         )
                     }
-
                     composable(route = Screen.EditNote.route, arguments = listOf(navArgument("noteId") { type = NavType.IntType })) { backStackEntry ->
                         val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0
                         val note = notesList.find { it.id == noteId }
-                        EditNoteScreen(
-                            noteId = noteId,
-                            note = note,
-                            onSave = { id, title, content -> notesViewModel.editNote(id, title, content) },
-                            onBack = { navController.popBackStack() }
-                        )
+                        EditNoteScreen(noteId = noteId, note = note, isDarkMode = uiState.isDarkMode, onSave = { id, title, content -> notesViewModel.editNote(id, title, content) }, onBack = { navController.popBackStack() })
                     }
                 }
             }

@@ -1,5 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -8,15 +8,19 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    // Plugin SQLDelight
+    id("app.cash.sqldelight") version "2.0.1"
 }
 
 kotlin {
     androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "11"
+            }
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -26,25 +30,18 @@ kotlin {
             isStatic = true
         }
     }
-    
-    jvm()
-    
-    js {
-        browser()
-        binaries.executable()
-    }
-    
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation("app.cash.sqldelight:android-driver:2.0.1")
         }
+
+        iosMain.dependencies {
+            implementation("app.cash.sqldelight:native-driver:2.0.1")
+        }
+
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
@@ -60,13 +57,15 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 
             implementation(compose.materialIconsExtended)
+
+            implementation("com.russhwolf:multiplatform-settings:1.1.1")
+            implementation("com.russhwolf:multiplatform-settings-coroutines:1.1.1")
+
+            implementation("app.cash.sqldelight:runtime:2.0.1")
+            implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-        }
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutinesSwing)
         }
     }
 }
@@ -102,14 +101,10 @@ dependencies {
     debugImplementation(libs.compose.uiTooling)
 }
 
-compose.desktop {
-    application {
-        mainClass = "com.example.myprofileapp.MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.example.myprofileapp"
-            packageVersion = "1.0.0"
+sqldelight {
+    databases {
+        create("AppDatabase") {
+            packageName.set("com.example.myprofileapp.db")
         }
     }
 }

@@ -1,0 +1,34 @@
+-- Membuat tabel (Sesuai dengan data class Note kamu)
+CREATE TABLE NoteEntity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    isFavorite INTEGER NOT NULL DEFAULT 0,
+    timestamp INTEGER NOT NULL
+);
+
+-- READ: Ambil semua note
+selectAll:
+SELECT * FROM NoteEntity ORDER BY timestamp DESC;
+
+-- CREATE: Tambah note
+insertNote:
+INSERT INTO NoteEntity(title, content, isFavorite, timestamp)
+VALUES (?, ?, ?, ?);
+
+-- UPDATE: Edit note
+updateNote:
+UPDATE NoteEntity SET title = ?, content = ?, timestamp = ? WHERE id = ?;
+
+-- UPDATE: Toggle favorite
+updateFavorite:
+UPDATE NoteEntity SET isFavorite = ? WHERE id = ?;
+
+-- DELETE: Hapus note
+deleteNote:
+DELETE FROM NoteEntity WHERE id = ?;
+
+
+-- SEARCH: Fitur pencarian (Syarat Tugas No. 3)
+searchNotes:
+SELECT * FROM NoteEntity WHERE title LIKE ? OR content LIKE ?;

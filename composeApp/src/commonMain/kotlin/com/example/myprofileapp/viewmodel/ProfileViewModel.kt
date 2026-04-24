@@ -1,24 +1,36 @@
 package com.example.myprofileapp.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.myprofileapp.data.ProfileUiState
+import com.example.myprofileapp.data.local.SettingsManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(private val settingsManager: SettingsManager) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    fun updateProfile(newName: String, newBio: String) {
-        _uiState.update { currentState ->
-            currentState.copy(name = newName, bio = newBio)
+    init {
+        // Pantau perubahan Dark Mode dari DataStore secara realtime
+        viewModelScope.launch {
+            settingsManager.isDarkModeFlow.collect { isDark ->
+                _uiState.update { it.copy(isDarkMode = isDark) }
+            }
         }
     }
+
+    fun updateProfile(newName: String, newBio: String) {
+        _uiState.update { it.copy(name = newName, bio = newBio) }
+    }
+
     fun toggleDarkMode(isDark: Boolean) {
-        _uiState.update { currentState ->
-            currentState.copy(isDarkMode = isDark)
+        // Simpan ke DataStore, nanti init{} di atas bakal otomatis nangkep perubahannya
+        viewModelScope.launch {
+            settingsManager.setDarkMode(isDark)
         }
     }
 }

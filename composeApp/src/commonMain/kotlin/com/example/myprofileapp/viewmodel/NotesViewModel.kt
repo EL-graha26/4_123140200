@@ -1,51 +1,49 @@
 package com.example.myprofileapp.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.myprofileapp.data.Note
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import com.example.myprofileapp.data.NotesUiState
+import com.example.myprofileapp.data.local.NoteRepository
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
-class NotesViewModel : ViewModel() {
-    private val _notes = MutableStateFlow<List<Note>>(emptyList())
-    val notes: StateFlow<List<Note>> = _notes.asStateFlow()
+class NotesViewModel(private val repository: NoteRepository) : ViewModel() {
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
 
-    private var nextId = 1
+    // UI State Logic: Otomatis nampilin hasil pencarian atau semua data
+    val uiState: StateFlow<NotesUiState> = _searchQuery
+        .flatMapLatest { query ->
+            if (query.isBlank()) repository.getAllNotes() else repository.searchNotes(query)
+        }
+        .map { notes ->
+            if (notes.isEmpty()) NotesUiState.Empty else NotesUiState.Success(notes)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NotesUiState.Loading)
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+    }
 
     fun addNote(title: String, content: String) {
-        if (title.isNotBlank() || content.isNotBlank()) {
-            _notes.update { currentList ->
-                currentList + Note(
-                    id = nextId++,
-                    title = title,
-                    content = content,
-                    timestamp = Clock.System.now().toEpochMilliseconds()
-                )
-            }
+        viewModelScope.launch {
+            repository.insertNote(title, content, Clock.System.now().toEpochMilliseconds())
         }
     }
 
-    fun editNote(id: Int, newTitle: String, newContent: String) {
-        _notes.update { currentList ->
-            currentList.map { note ->
-                if (note.id == id) {
-                    note.copy(
-                        title = newTitle,
-                        content = newContent,
-                        timestamp = Clock.System.now().toEpochMilliseconds()
-                    )
-                } else note
-            }
+    fun editNote(id: Int, title: String, content: String) {
+        viewModelScope.launch {
+            repository.updateNote(id, title, content, Clock.System.now().toEpochMilliseconds())
         }
     }
 
-    fun toggleFavorite(id: Int) {
-        _notes.update { currentList ->
-            currentList.map { note ->
-                if (note.id == id) note.copy(isFavorite = !note.isFavorite) else note
-            }
-        }
+    fun deleteNote(id: Int) {
+        viewModelScope.launch { repository.deleteNote(id) }
+    }
+
+    fun toggleFavorite(id: Int, currentStatus: Boolean) {
+        viewModelScope.launch { repository.toggleFavorite(id, currentStatus) }
     }
 }

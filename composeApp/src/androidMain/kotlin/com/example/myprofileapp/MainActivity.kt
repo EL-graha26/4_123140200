@@ -1,22 +1,29 @@
 package com.example.myprofileapp
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.myprofileapp.data.local.DatabaseDriverFactory
+import com.russhwolf.settings.SharedPreferencesSettings
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 1. Setup DataStore (Preferences) Android
+        val sharedPrefs = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val settings = SharedPreferencesSettings(sharedPrefs)
+
+        // 2. Setup Driver Database Android
+        val driverFactory = DatabaseDriverFactory(this)
+
         setContent {
-            App() // Ini memanggil UI utama dari folder commonMain
+            // 3. Masukkan ke App()
+            App(
+                databaseDriverFactory = driverFactory,
+                settings = settings
+            )
         }
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
 }

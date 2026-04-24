@@ -1,160 +1,165 @@
 package com.example.myprofileapp.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myprofileapp.components.EditProfileDialog
-import com.example.myprofileapp.components.InfoItem
-import com.example.myprofileapp.components.ProfileCard
-import com.example.myprofileapp.components.ProfileHeader
-import com.example.myprofileapp.components.StatItem
 import com.example.myprofileapp.data.ProfileUiState
+import myprofileapp.composeapp.generated.resources.Res
+import myprofileapp.composeapp.generated.resources.download
+import org.jetbrains.compose.resources.painterResource
 
-    @Composable
-    fun ProfileScreen(uiState: ProfileUiState, onEditProfile: (String, String) -> Unit, onToggleDarkMode: (Boolean) -> Unit) {
-        var showEditDialog by remember { mutableStateOf(false) }
-        var showDetails by remember { mutableStateOf(false) }
-        var isFollowing by remember { mutableStateOf(false) } // State tombol Follow
-        val scrollState = rememberScrollState()
+// HAPUS DEKLARASI WARNA DI SINI KARENA SUDAH ADA DI SCREENS.KT
+// val SageGreen = ... (Dihapus)
+// val OffWhiteBg = ... (Dihapus)
+// dan seterusnya...
 
-        // === LOGIKA WARNA DINAMIS (DARK MODE / LIGHT MODE) ===
-        val isDark = uiState.isDarkMode
+@Composable
+fun ProfileScreen(uiState: ProfileUiState, onEditProfile: (String, String) -> Unit, onToggleDarkMode: (Boolean) -> Unit) {
+    var showEditDialog by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
-        // Background dan Kartu
-        val bgColor = if (isDark) Color(0xFF121212) else Color(0xFFFFF0F0)
-        val surfaceColor = if (isDark) Color(0xFF1E1E1E) else Color(0xFFFFFFFF)
+    val isDark = uiState.isDarkMode
+    val bgColor = if (isDark) Color(0xFF121212) else OffWhiteBg // Otomatis baca dari Screens.kt
+    val cardColor = if (isDark) Color(0xFF1E1E1E) else PureWhite
+    val textColor = if (isDark) PureWhite else TextPrimaryDark
 
-        // Teks dan Pembatas
-        val textColorPrimary = if (isDark) Color.White else Color(0xFF212121)
-        val dividerColor = if (isDark) Color(0xFF333333) else Color(0xFFE0E0E0)
+    if (showEditDialog) {
+        EditProfileDialog(
+            currentName = uiState.name, currentBio = uiState.bio, isDark = isDark,
+            onDismiss = { showEditDialog = false },
+            onSave = { newName, newBio -> onEditProfile(newName, newBio); showEditDialog = false }
+        )
+    }
 
-        // Warna Merah (Di-soft-kan kalau masuk Dark Mode biar nggak sakit di mata)
-        val headerTop = if (isDark) Color(0xFF6B1111) else Color(0xFFB71C1C)
-        val headerBottom = if (isDark) Color(0xFF8E1D1D) else Color(0xFFE53935)
+    Column(modifier = Modifier.fillMaxSize().background(bgColor).verticalScroll(scrollState).padding(bottom = 80.dp)) {
 
-        // Warna Tombol
-        val btnFollowBg = if (isFollowing) Color.DarkGray else headerTop
-        val btnEditBg = if (isDark) Color(0xFF333333) else Color.White
-        val btnEditContent = if (isDark) Color.White else headerTop
-
-        // Tampilkan Dialog saat tombol Edit ditekan
-        if (showEditDialog) {
-            EditProfileDialog(
-                currentName = uiState.name, currentBio = uiState.bio,
-                onDismiss = { showEditDialog = false },
-                onSave = { newName, newBio ->
-                    onEditProfile(newName, newBio)
-                    showEditDialog = false
-                }
-            )
-        }
-
-        Column(modifier = Modifier.fillMaxSize().background(bgColor).verticalScroll(scrollState)) {
-
-            ProfileHeader(
-                name = uiState.name, title = uiState.title, bio = uiState.bio,
-                isDarkMode = isDark, onToggleDarkMode = onToggleDarkMode,
-                headerTop = headerTop, headerBottom = headerBottom
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).offset(y = (-20).dp),
-                shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = surfaceColor),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        // --- HEADER PROFIL (Avatar & Info Utama) ---
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 40.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(120.dp).border(2.dp, SageGreen.copy(alpha = 0.5f), CircleShape).padding(6.dp)
             ) {
-                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    StatItem(value = "12", label = "Proyek", textColor = textColorPrimary)
-                    StatItem(value = "4.00", label = "IPK", textColor = textColorPrimary)
-                    StatItem(value = "6", label = "Semester", textColor = textColorPrimary)
-                }
+                Image(
+                    painter = painterResource(Res.drawable.download),
+                    contentDescription = "Foto Profil",
+                    modifier = Modifier.size(108.dp).clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Tombol Follow
-                Button(
-                    onClick = { isFollowing = !isFollowing },
-                    modifier = Modifier.weight(1f).height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = btnFollowBg)
-                ) {
-                    Text(if (isFollowing) "✔️ Following" else "➕ Follow", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-                }
-
-                // Tombol Edit Profil
-                OutlinedButton(
-                    onClick = { showEditDialog = true },
-                    modifier = Modifier.weight(1f).height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = btnEditBg)
-                ) {
-                    Text("✏️ Edit Profil", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = btnEditContent)
-                }
-            }
-
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(uiState.name, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = textColor)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(uiState.title, fontSize = 14.sp, color = SageGreen, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { showDetails = !showDetails },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(50.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = headerBottom)
-            ) {
-                Text(if (showDetails) "Tutup Detail Kontak" else "Lihat Detail Kontak", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-            }
+            Text(uiState.bio, fontSize = 14.sp, color = TextSecondary, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 32.dp), lineHeight = 20.sp)
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            AnimatedVisibility(
-                visible = showDetails,
-                enter = expandVertically(animationSpec = tween(500)),
-                exit = shrinkVertically(animationSpec = tween(500))
+            Button(
+                onClick = { showEditDialog = true },
+                colors = ButtonDefaults.buttonColors(containerColor = if (isDark) Color(0xFF333333) else Color(0xFFEEEEEE)),
+                shape = RoundedCornerShape(50),
+                elevation = ButtonDefaults.buttonElevation(0.dp)
             ) {
-                Column {
-                    ProfileCard(title = "Informasi Kontak", containerColor = surfaceColor, titleColor = headerBottom) {
-                        InfoItem("✉️", "Email", "muhammad.123140200@student.itera.ac.id", textColorPrimary, dividerColor)
-                        InfoItem("📞", "Telepon", "+62 815-7311-0182", textColorPrimary, dividerColor)
-                        InfoItem("📍", "Lokasi", "Bandar Lampung, Indonesia", textColorPrimary, dividerColor)
-                    }
+                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = textColor, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Edit Profil", color = textColor, fontWeight = FontWeight.SemiBold)
+            }
+        }
 
-                    ProfileCard(title = "Keahlian", containerColor = surfaceColor, titleColor = headerBottom) {
-                        InfoItem("⭐", "Mobile Dev", "Kotlin, Compose", textColorPrimary, dividerColor)
-                        InfoItem("🛠️", "Data", "MySQL, MongoDB", textColorPrimary, dividerColor)
+        // --- BAGIAN PENGATURAN (SETTINGS & DARK MODE) ---
+        Text("Pengaturan", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = textColor, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = cardColor),
+            elevation = CardDefaults.cardElevation(0.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if(isDark) Color(0xFF333333) else Color(0xFFF0F0F0)), contentAlignment = Alignment.Center) {
+                        Icon(if (isDark) Icons.Default.DarkMode else Icons.Default.LightMode, contentDescription = "Mode", tint = if (isDark) Color(0xFFF6E05E) else Color(0xFFED8936))
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(if (isDark) "Mode Gelap Aktif" else "Mode Terang Aktif", fontWeight = FontWeight.Bold, color = textColor, fontSize = 15.sp)
+                        Text("Tema aplikasi akan tersimpan", color = TextSecondary, fontSize = 12.sp)
                     }
                 }
+                Switch(
+                    checked = isDark,
+                    onCheckedChange = { onToggleDarkMode(it) },
+                    colors = SwitchDefaults.colors(checkedThumbColor = PureWhite, checkedTrackColor = SageGreen, uncheckedThumbColor = Color.Gray, uncheckedTrackColor = Color(0xFFE0E0E0))
+                )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- BAGIAN INFORMASI KONTAK ---
+        Text("Informasi Kontak", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = textColor, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = cardColor),
+            elevation = CardDefaults.cardElevation(0.dp)
+        ) {
+            Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                ContactItem(Icons.Default.Email, "Email", "muhammad.123140200@student.itera.ac.id", textColor, isDark)
+                HorizontalDivider(color = if(isDark) Color(0xFF333333) else Color(0xFFF0F0F0), modifier = Modifier.padding(start = 72.dp))
+                ContactItem(Icons.Default.Phone, "Telepon", "+62 815-7311-0182", textColor, isDark)
+                HorizontalDivider(color = if(isDark) Color(0xFF333333) else Color(0xFFF0F0F0), modifier = Modifier.padding(start = 72.dp))
+                ContactItem(Icons.Default.LocationOn, "Lokasi", "Bandar Lampung, Indonesia", textColor, isDark)
+            }
         }
     }
+}
+
+@Composable
+fun ContactItem(icon: ImageVector, label: String, value: String, textColor: Color, isDark: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if(isDark) Color(0xFF333333) else Color(0xFFF0F0F0)), contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = label, tint = SageGreen, modifier = Modifier.size(20.dp))
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(label, color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+            Text(value, color = textColor, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
