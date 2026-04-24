@@ -1,60 +1,56 @@
-# My Profile App
+# 📝 KMP Notes App - Offline First (Tugas Praktikum Minggu 7)
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-Multiplatform-blue?logo=kotlin)](#)
-[![Compose](https://img.shields.io/badge/Compose-Multiplatform-success?logo=jetpackcompose)](#)
+Aplikasi pencatatan (*Notes App*) lintas platform berbasis **Kotlin Multiplatform (KMP)** dan **Compose Multiplatform**. Proyek ini merupakan implementasi dari Tugas Praktikum Pertemuan 7 mata kuliah Pengembangan Aplikasi Mobile, dengan fokus pada arsitektur **Offline-First**, manajemen status (*UI States*), dan desain UI/UX modern ala *Pinterest Grid*.
 
-[cite_start]**Tugas Praktikum Pertemuan 3 — Compose Multiplatform Basics** [cite: 3, 4]  
-[cite_start]IF25-22017 Pengembangan Aplikasi Mobile [cite: 1, 2]  
-[cite_start]Program Studi Teknik Informatika · Institut Teknologi Sumatera [cite: 6, 7]  
+## ✨ Fitur Utama (Sesuai Spesifikasi Tugas)
+Aplikasi ini telah memenuhi seluruh kriteria penugasan:
+1. **SQLDelight Database:** Penyimpanan data lokal yang *type-safe* dan tangguh.
+2. **CRUD Operations:** Pengguna dapat membuat (*Create*), membaca (*Read*), mengubah (*Update*), dan menghapus (*Delete*) catatan secara *real-time*.
+3. **Search Functionality:** Fitur pencarian pintar berdasarkan judul atau isi catatan. Tersedia juga *Filter Chips* (Penting, Ide, Tugas) untuk menyortir catatan secara instan.
+4. **Settings Screen (DataStore):** Halaman profil terintegrasi sebagai *dashboard* pengaturan untuk menyimpan preferensi tema (Mode Gelap/Terang) secara persisten menggunakan `Multiplatform Settings`. Dilengkapi juga dengan fitur pengurutan (Terbaru/Terlama).
+5. **Offline-First:** Seluruh data catatan dan pengaturan tersimpan secara lokal tanpa memerlukan koneksi internet.
+6. **Proper UI States:** Penanganan status UI secara mulus yang menampilkan kondisi *Loading* (saat memuat), *Empty* (saat tidak ada catatan), dan *Content* (saat data berhasil dimuat).
+
+## 🗄️ Skema Database (Database Schema)
+Aplikasi ini menggunakan SQLDelight dengan skema tabel tunggal `noteEntity` sebagai berikut:
+
+| Column Name  | Data Type | Constraints                 | Description                                      |
+| :---         | :---      | :---                        | :---                                             |
+| `id`         | INTEGER   | PRIMARY KEY AUTOINCREMENT   | ID unik untuk setiap catatan                     |
+| `title`      | TEXT      | NOT NULL                    | Judul utama catatan                              |
+| `content`    | TEXT      | NOT NULL                    | Isi / deskripsi dari catatan                     |
+| `isFavorite` | INTEGER   | NOT NULL DEFAULT 0          | Penanda favorit (1 untuk True, 0 untuk False)    |
+| `timestamp`  | INTEGER   | NOT NULL                    | Waktu pembuatan catatan (dalam *epoch millis*)   |
+
+> *Catatan: Tabel ini di-generate otomatis oleh SQLDelight melalui file `Note.sq`.*
+
+## 📸 Screenshots
+Berikut adalah tangkapan layar dari antarmuka aplikasi dengan mode Terang dan Gelap (*Dark Mode*):
+
+| Home Screen (Light) | Home Screen (Dark) | Profile & Settings | Add/Edit Note |
+| :---: | :---: | :---: | :---: |
+|<img width="738" height="1600" alt="WhatsApp Image 2026-04-24 at 22 11 24" src="https://github.com/user-attachments/assets/10955de7-2949-499b-ba98-be4f15c8dcfd" />|<img width="738" height="1600" alt="WhatsApp Image 2026-04-24 at 22 11 24 (1)" src="https://github.com/user-attachments/assets/e90dec88-1fab-429a-bbdd-1d56880c2ada" />|<img width="738" height="1600" alt="WhatsApp Image 2026-04-24 at 22 11 24 (2)" src="https://github.com/user-attachments/assets/bb2e1dc0-3414-4169-9185-525c24d31214" />|<img width="1080" height="2340" alt="WhatsApp Image 2026-04-24 at 22 11 24 (3)" src="https://github.com/user-attachments/assets/f9141636-4fa4-4f68-b44c-87b4bc5cd538" />|
+
+## 🎥 Video Demo
+Demonstrasi fungsionalitas CRUD, pencarian, perpindahan tema (Settings), dan pembuktian mode offline (tersimpan lokal) dalam durasi 45 detik dapat dilihat pada video berikut:
+
+
+
+https://github.com/user-attachments/assets/aa742b61-a29c-46a9-9547-ebda25bf297f
+
+
+
+## 🛠️ Teknologi yang Digunakan
+* **Framework:** Compose Multiplatform (Jetpack Compose)
+* **Arsitektur:** MVVM (Model-View-ViewModel) dengan Kotlin Flow
+* **Database:** SQLDelight (`app.cash.sqldelight:android-driver:2.0.1`)
+* **Preferences:** Multiplatform Settings (`com.russhwolf:multiplatform-settings-coroutines:1.1.1`)
+* **Waktu & Tanggal:** Kotlinx DateTime
+* **Navigasi:** Compose Navigation
 
 ---
 
-## Deskripsi
-
-[cite_start]**My Profile App** adalah aplikasi multiplatform yang dibangun menggunakan Kotlin dan Compose Multiplatform[cite: 9, 10]. Aplikasi ini menampilkan halaman profil pengguna dengan Tema Merah khas ITERA. Aplikasi ini dilengkapi animasi, informasi kontak, dan daftar keahlian. [cite_start]Dirancang dengan paradigma UI Deklaratif [cite: 51, 52] agar performanya optimal dan responsif.
-
-## Screenshot
-
-<img width="418" height="804" alt="image" src="https://github.com/user-attachments/assets/6675a317-1591-4ef5-9584-8680e5c23cc3" />
-<img width="419" height="881" alt="image" src="https://github.com/user-attachments/assets/7f16dab1-4025-4dd1-9d3f-9e4bc0e7412c" />
-
-## Pemenuhan Rubrik Penilaian
-
-[cite_start]Aplikasi ini telah memenuhi seluruh kriteria penilaian dan mencapai target Bonus[cite: 639]:
-
-* [cite_start]**Layout Implementation (25%)** [cite: 639][cite_start]: Menggunakan kombinasi tata letak `Column`, `Row`, dan `Box`[cite: 168, 639].
-* [cite_start]**Reusable Composables (25%)** [cite: 639][cite_start]: Memiliki 4 custom composable functions (`ProfileHeader`, `StatItem`, `InfoItem`, `ProfileCard`)[cite: 630, 639].
-* [cite_start]**UI Components (20%)** [cite: 639][cite_start]: Menggunakan komponen dasar seperti `Text`, `Button`, `Image` (dengan foto asli), dan `Card`[cite: 29, 631, 639].
-* [cite_start]**Modifiers (15%)** [cite: 639][cite_start]: Melakukan styling dengan modifier (gradient background, padding, clip, shape, offset, dan border)[cite: 28, 639].
-* [cite_start]**Bonus Animasi (+10%)** [cite: 639][cite_start]: Mengimplementasikan `AnimatedVisibility` [cite: 639] untuk efek animasi saat tombol "Lihat Detail" ditekan.
-* **Bebas Error**: Menggunakan karakter Emoji bawaan sebagai pengganti *library* ikon eksternal agar aplikasi dapat berjalan lancar tanpa masalah *dependency*.
-
-## Struktur Composable Functions
-
-| Composable | Kegunaan |
-| :--- | :--- |
-| `ProfileHeader` | Header merah yang menampilkan foto profil (`Image`), nama, gelar, dan bio. |
-| `StatItem` | Komponen untuk menampilkan angka statistik (Proyek, IPK, Semester). |
-| `InfoItem` | Baris informasi berisi Emoji, label, dan nilai (dipakai untuk Kontak & Keahlian). |
-| `ProfileCard` | Komponen `Card` untuk membungkus grup informasi terkait. |
-| `App` | Fungsi utama yang menyatukan seluruh komponen UI dan mengatur jalannya animasi. |
-
-## Teknologi & Tools
-
-* [cite_start]**Bahasa Utama**: Kotlin [cite: 9, 52]
-* [cite_start]**Framework UI**: Compose Multiplatform [cite: 9, 52] (Material 3)
-* [cite_start]**State Management**: `remember`, `mutableStateOf` [cite: 457]
-* **Animation**: `androidx.compose.animation`
-
-## Cara Menjalankan Aplikasi
-
-### Android
-1. Buka project di **Android Studio**.
-2. Tunggu hingga proses *Sync Gradle* selesai.
-3. Pilih target *run* pada modul `composeApp`.
-4. Jalankan di emulator atau perangkat Android fisik (tekan **Shift + F10**).
-
-### Desktop (JVM)
-Buka terminal di dalam folder project dan jalankan perintah berikut:
-```bash
-./gradlew :composeApp:run
+**Dibuat oleh:**
+* **Nama:** Muhammad Piela Nugraha
+* **NIM:** 123140200
+* **Instansi:** Institut Teknologi Sumatera (ITERA)
