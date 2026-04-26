@@ -10,12 +10,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,19 +37,22 @@ import com.example.myprofileapp.data.ProfileUiState
 import myprofileapp.composeapp.generated.resources.Res
 import myprofileapp.composeapp.generated.resources.download
 import org.jetbrains.compose.resources.painterResource
-
-// HAPUS DEKLARASI WARNA DI SINI KARENA SUDAH ADA DI SCREENS.KT
-// val SageGreen = ... (Dihapus)
-// val OffWhiteBg = ... (Dihapus)
-// dan seterusnya...
+import org.koin.compose.koinInject
 
 @Composable
 fun ProfileScreen(uiState: ProfileUiState, onEditProfile: (String, String) -> Unit, onToggleDarkMode: (Boolean) -> Unit) {
     var showEditDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
+    val deviceInfo: com.example.myprofileapp.platform.DeviceInfo = koinInject()
+    val batteryInfo: com.example.myprofileapp.platform.BatteryInfo = koinInject()
+
+    // Mengumpulkan Aliran Data Baterai secara Real-time
+    val batteryLevel by batteryInfo.observeBatteryLevel().collectAsState(initial = 0)
+    val isCharging by batteryInfo.observeChargingStatus().collectAsState(initial = false)
+
     val isDark = uiState.isDarkMode
-    val bgColor = if (isDark) Color(0xFF121212) else OffWhiteBg // Otomatis baca dari Screens.kt
+    val bgColor = if (isDark) Color(0xFF121212) else OffWhiteBg
     val cardColor = if (isDark) Color(0xFF1E1E1E) else PureWhite
     val textColor = if (isDark) PureWhite else TextPrimaryDark
 
@@ -58,8 +65,8 @@ fun ProfileScreen(uiState: ProfileUiState, onEditProfile: (String, String) -> Un
     }
 
     Column(modifier = Modifier.fillMaxSize().background(bgColor).verticalScroll(scrollState).padding(bottom = 80.dp)) {
+        GlobalOfflineBanner()
 
-        // --- HEADER PROFIL (Avatar & Info Utama) ---
         Column(
             modifier = Modifier.fillMaxWidth().padding(top = 40.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -95,7 +102,6 @@ fun ProfileScreen(uiState: ProfileUiState, onEditProfile: (String, String) -> Un
             }
         }
 
-        // --- BAGIAN PENGATURAN (SETTINGS & DARK MODE) ---
         Text("Pengaturan", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = textColor, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
         Card(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
@@ -128,8 +134,7 @@ fun ProfileScreen(uiState: ProfileUiState, onEditProfile: (String, String) -> Un
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- BAGIAN INFORMASI KONTAK ---
-        Text("Informasi Kontak", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = textColor, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+        Text("Informasi Perangkat", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = textColor, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
         Card(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
             shape = RoundedCornerShape(20.dp),
@@ -137,13 +142,79 @@ fun ProfileScreen(uiState: ProfileUiState, onEditProfile: (String, String) -> Un
             elevation = CardDefaults.cardElevation(0.dp)
         ) {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                ContactItem(Icons.Default.Email, "Email", "muhammad.123140200@student.itera.ac.id", textColor, isDark)
+                ContactItem(Icons.Default.PhoneAndroid, "Tipe Perangkat", deviceInfo.getDeviceName(), textColor, isDark)
                 HorizontalDivider(color = if(isDark) Color(0xFF333333) else Color(0xFFF0F0F0), modifier = Modifier.padding(start = 72.dp))
-                ContactItem(Icons.Default.Phone, "Telepon", "+62 815-7311-0182", textColor, isDark)
-                HorizontalDivider(color = if(isDark) Color(0xFF333333) else Color(0xFFF0F0F0), modifier = Modifier.padding(start = 72.dp))
-                ContactItem(Icons.Default.LocationOn, "Lokasi", "Bandar Lampung, Indonesia", textColor, isDark)
+                ContactItem(Icons.Default.SystemUpdate, "Sistem Operasi", deviceInfo.getOsVersion(), textColor, isDark)
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Status Baterai", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = textColor, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = cardColor),
+            elevation = CardDefaults.cardElevation(0.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier.size(44.dp).clip(CircleShape).background(if(isDark) Color(0xFF333333) else Color(0xFFF0F0F0)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Ganti Ikon saat ngecas
+                            Icon(
+                                imageVector = if (isCharging) Icons.Default.Power else Icons.Default.BatteryFull,
+                                contentDescription = "Battery",
+                                tint = if (isCharging) Color(0xFFFFB300) else if (batteryLevel <= 20) Color(0xFFE53935) else SageGreen,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Daya Perangkat", color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                            Text(
+                                text = if (isCharging) "Sedang Mengisi Daya" else "Menggunakan Baterai",
+                                color = textColor,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                    Text(
+                        text = "$batteryLevel%",
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (isCharging) Color(0xFFFFB300) else if (batteryLevel <= 20) Color(0xFFE53935) else SageGreen
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(50)).background(if (isDark) Color(0xFF333333) else Color(0xFFE0E0E0))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(batteryLevel / 100f) // Lebar menyesuaikan persen
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(50))
+                            .background(
+                                if (isCharging) Color(0xFFFFB300) // Kuning Emas saat ngecas
+                                else if (batteryLevel <= 20) Color(0xFFE53935) // Merah kalau mau habis
+                                else SageGreen // Hijau Sage
+                            )
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

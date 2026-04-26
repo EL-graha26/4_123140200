@@ -1,5 +1,10 @@
 package com.example.myprofileapp.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,14 +19,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.SwapVert
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +42,7 @@ import com.example.myprofileapp.data.Note
 import com.example.myprofileapp.data.NotesUiState
 import kotlinx.coroutines.delay
 import kotlinx.datetime.*
+import org.koin.compose.koinInject
 
 val SageGreen = Color(0xFF8BA888)
 val OffWhiteBg = Color(0xFFFBFBFB)
@@ -54,6 +61,51 @@ fun formatRealtimeClock(instant: Instant): String {
     val time = instant.toLocalDateTime(TimeZone.currentSystemDefault())
     return "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
 }
+
+@Composable
+fun GlobalOfflineBanner() {
+    val networkMonitor: com.example.myprofileapp.platform.NetworkMonitor = koinInject()
+    val isConnected by networkMonitor.observeConnectivity().collectAsState(initial = true)
+
+    var showBanner by remember { mutableStateOf(false) }
+
+    // Logika Pintar: Muncul 3 detik lalu sembunyi
+    LaunchedEffect(isConnected) {
+        if (!isConnected) {
+            showBanner = true
+            delay(3000) // Tampil 3 detik
+            showBanner = false
+        } else {
+            showBanner = false
+        }
+    }
+
+    AnimatedVisibility(
+        visible = showBanner,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50)) // Bentuk kapsul yang rapi
+                    .background(Color(0xFFE53935))
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.CloudOff, contentDescription = "Offline", tint = Color.White, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Kamu sedang offline", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+// ==========================================
 
 @Composable
 fun AppHeader(isDarkMode: Boolean) {
@@ -131,6 +183,8 @@ fun NoteListScreen(uiState: NotesUiState, searchQuery: String, onSearchChanged: 
     var isSortDescending by remember { mutableStateOf(true) }
 
     Column(modifier = Modifier.fillMaxSize().background(if (isDarkMode) Color(0xFF121212) else OffWhiteBg)) {
+        GlobalOfflineBanner() // Memanggil Banner di Home
+
         AppHeader(isDarkMode)
         SearchBarClean(searchQuery, onSearchChanged, isDarkMode)
         CategoryChips(selectedCategory, { selectedCategory = it }, isDarkMode)
@@ -162,7 +216,6 @@ fun NoteListScreen(uiState: NotesUiState, searchQuery: String, onSearchChanged: 
                 if (sortedNotes.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) { Text("Tidak ada catatan di kategori ini.", color = TextSecondary) }
                 } else {
-                    // PERBAIKAN: Padding diperbaiki agar tidak error
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -191,6 +244,8 @@ fun NoteListScreen(uiState: NotesUiState, searchQuery: String, onSearchChanged: 
 fun FavoritesScreen(notes: List<Note>, isDarkMode: Boolean, onNoteClick: (Int) -> Unit, onToggleFavorite: (Int) -> Unit) {
     val favoriteNotes = notes.filter { it.isFavorite }
     Column(modifier = Modifier.fillMaxSize().background(if (isDarkMode) Color(0xFF121212) else OffWhiteBg)) {
+        GlobalOfflineBanner() // Memanggil Banner di Favorit
+
         Text("Favorit Saya", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = if (isDarkMode) PureWhite else TextPrimaryDark, modifier = Modifier.padding(start = 20.dp, top = 32.dp, bottom = 24.dp), letterSpacing = (-0.5).sp)
         if (favoriteNotes.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) { Text("Belum ada yang ditandai.", color = TextSecondary) }

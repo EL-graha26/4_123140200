@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 
-// Kumpulan Rute Layar
 sealed class Screen(val route: String) {
     object Notes : Screen("notes")
     object Favorites : Screen("favorites")
@@ -22,7 +21,6 @@ sealed class Screen(val route: String) {
     }
 }
 
-// Kumpulan Item Bottom Navigation
 sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
     object Notes : BottomNavItem(Screen.Notes.route, Icons.Default.Home, "Notes")
     object Favorites : BottomNavItem(Screen.Favorites.route, Icons.Default.Favorite, "Favorites")

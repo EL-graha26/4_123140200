@@ -24,50 +24,35 @@ import androidx.navigation.navArgument
 // --- BAGIAN IMPORT DATA ---
 import com.example.myprofileapp.data.Note
 import com.example.myprofileapp.data.NotesUiState
-import com.example.myprofileapp.data.local.DatabaseDriverFactory
-import com.example.myprofileapp.data.local.NoteRepository
-import com.example.myprofileapp.data.local.SettingsManager
 import com.example.myprofileapp.navigation.BottomNavItem
 import com.example.myprofileapp.navigation.Screen
 import com.example.myprofileapp.screens.*
 import com.example.myprofileapp.viewmodel.ProfileViewModel
 import com.example.myprofileapp.viewmodel.NotesViewModel
-import com.russhwolf.settings.ObservableSettings
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App(
-    databaseDriverFactory: DatabaseDriverFactory,
-    settings: ObservableSettings
-) {
-    val repository = remember { NoteRepository(databaseDriverFactory) }
-    val settingsManager = remember { SettingsManager(settings) }
-    val profileViewModel = remember { ProfileViewModel(settingsManager) }
-    val notesViewModel = remember { NotesViewModel(repository) }
-
+fun App() {
+    val profileViewModel: ProfileViewModel = koinInject()
+    val notesViewModel: NotesViewModel = koinInject()
     val uiState by profileViewModel.uiState.collectAsState()
     val notesUiState by notesViewModel.uiState.collectAsState()
     val searchQuery by notesViewModel.searchQuery.collectAsState()
-
     val notesList = when (notesUiState) {
         is NotesUiState.Success -> (notesUiState as NotesUiState.Success).notes
         else -> emptyList<Note>()
     }
-
     val colorScheme = if (uiState.isDarkMode) darkColorScheme() else lightColorScheme()
-
     MaterialTheme(colorScheme = colorScheme) {
         val navController = rememberNavController()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
-
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
-
         val bottomNavItems = listOf(BottomNavItem.Notes, BottomNavItem.Favorites, BottomNavItem.Profile)
         val showBottomNav = bottomNavItems.any { it.route == currentRoute }
-
         val SageGreen = Color(0xFF8BA888)
         val softGray = Color(0xFF888888)
 
@@ -167,10 +152,9 @@ fun App(
                         NoteDetailScreen(
                             note = note, isDarkMode = uiState.isDarkMode, onBack = { navController.popBackStack() },
                             onEditClick = { id -> navController.navigate(Screen.EditNote.createRoute(id)) },
-                            // PERBAIKAN: Menambahkan fungsi Delete!
                             onDeleteClick = { id ->
-                                notesViewModel.deleteNote(id) // Hapus dari database
-                                navController.popBackStack()  // Langsung kembali ke layar utama
+                                notesViewModel.deleteNote(id)
+                                navController.popBackStack()
                             }
                         )
                     }

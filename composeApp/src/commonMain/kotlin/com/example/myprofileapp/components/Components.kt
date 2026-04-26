@@ -22,7 +22,6 @@ import myprofileapp.composeapp.generated.resources.Res
 import myprofileapp.composeapp.generated.resources.download
 import org.jetbrains.compose.resources.painterResource
 
-// Tema Sage Green biar konsisten
 val SageGreen = Color(0xFF8BA888)
 
 @Composable
@@ -72,7 +71,6 @@ fun EditProfileDialog(
     )
 }
 
-// ... (Kode Header dan Komponen Profil Lainnya Sama) ...
 
 @Composable
 fun ProfileHeader(name: String, title: String, bio: String, isDarkMode: Boolean) {
